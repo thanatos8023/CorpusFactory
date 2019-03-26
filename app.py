@@ -231,4 +231,4 @@ def preprocessing(rt):
 
 
 if __name__ == "__main__":
-	print('Hello world')
+	app.run(host='0.0.0.0', port=3030)
