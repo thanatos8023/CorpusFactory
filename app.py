@@ -2,6 +2,8 @@
 import cfw
 import dataLoader as dc
 import os
+import glob
+from flask import Flask, render_template, request, redirect, send_file
 
 # 1. Python console program
 class in_console():
@@ -12,9 +14,11 @@ class in_console():
 
 		if step1 == '1':
 			self.uni_excels()
-		else step2 == '2':
+		elif step1 == '2':
 			self.raw = dict()
 			self.make_corpus()
+		else:
+			return 0
 
 
 	def uni_excels(self):
@@ -62,6 +66,169 @@ class in_console():
 		cfw_obj = cfw.CorpusFactory(rawpath)
 		cfw_obj.make_corpus()
 
+# 2. Web application
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+	return "Hello world!"
+
+@app.route('/cf')
+def home():
+	return render_template('cf.html')
+
+
+def file_existance_messages():
+	messages = dict()
+
+	if os.path.exists('work/q2i.txt'):
+		messages['q2i'] = 'Question to Intention mapping files loaded.'
+	else:
+		messages['q2i'] = 'No q2i founded. Please upload the q2i file.'
+
+	if os.path.exists('raw.txt'):
+		messages['raw'] = 'Raw corpus was maden and loaded. Please upload the contents files.'
+	else:
+		messages['raw'] = 'No raw corpus founded. Please upload excel files for making raw file.'
+
+	if glob.glob('work/contents/*.txt'):
+		messages['cont'] = 'Contents files uploaded.'
+	else:
+		messages['cont'] = 'No contents files on server. Cannot make yml corpus. Please upload the contents files.'
+
+	return messages
+
+@app.route('/ldfiles')
+@app.route('/ldfiles/<filemeth>', methods=['GET', 'POST'])
+def excel_load(filemeth=None):
+	file_type = request.args.get('type')
+
+	if request.method == 'POST':
+		if filemeth == 'xl':
+			if file_type == 'q2i':
+				file = request.files['q2i']
+				file.save(os.getcwd() + '/work/q2i.txt')
+
+				return redirect('/ldfiles/xl')
+
+			elif file_type == 'xl':
+				# saving the files for working
+				fobj_list = request.files.getlist('xl')
+				for fs in fobj_list:
+					fs.save(os.getcwd() + '/work/' + fs.filename)
+
+				print('excel files saved in work/ directory.')
+
+				# need q2i file loaded
+				if os.path.exists(os.getcwd() + '/work/q2i.txt'):
+					dc.make_raw('work/q2i.txt', 'work/')
+
+				return redirect('/ldfiles/xl')
+
+			elif file_type == 'cont':
+				fobj_list = request.files.getlist('cont')
+				for fs in fobj_list:
+					fs.save(os.getcwd() + '/work/contents/' + fs.filename)
+
+				return redirect('/ldfiles/xl')
+
+		elif filemeth == 'raw':
+			if file_type == 'raw':
+				file = request.files['raw']
+				file.save(os.getcwd() + '/raw.txt')
+
+				return redirect('/ldfiles/raw')
+
+			elif file_type == 'cont':
+				fobj_list = request.files.getlist('cont')
+				for fs in fobj_list:
+					fs.save(os.getcwd() + '/work/contents/' + fs.filename)
+
+				return redirect('/ldfiles/raw')
+
+	else:
+		messages = file_existance_messages()
+
+		if filemeth == 'xl':
+			return render_template('xlfiles.html', q2i_msg=messages['q2i'], raw_msg=messages['raw'], cont_msg=messages['cont'])
+		elif filemeth == 'raw':
+			return render_template('rawfiles.html', cor_msg=messages['raw'], cont_msg=messages['cont'])
+		else:
+			return render_template('cf.html')
+
+
+@app.route('/makeyml', methods=['GET', 'POST'])
+def make_yml():
+	train_ratio = request.args.get('t_ratio')
+	train_ratio = float(train_ratio)
+
+	cps = cfw.CorpusFactory('raw.txt', isEng=False)
+	cps.make_corpus(train_ratio)
+
+	for filename in glob.glob('work/*.*'):
+		os.remove(filename)
+	print('q2i and excel files cleared')
+
+	for filename in glob.glob('work/contents/*.*'):
+		os.remove(filename)
+	print('contents files cleared')
+
+	os.remove('raw.txt')
+	print('raw file cleared')
+
+	return redirect('/download')
+
+@app.route('/train', methods=['GET', 'POST'])
+def train_download():
+	return send_file('train.yml')
+@app.route('/test', methods=['GET', 'POST'])
+def test_download():
+	return send_file('test.yml')
+
+@app.route('/download', methods=['GET', 'POST'])
+def download():
+	return render_template('download.html', trainlink='/train', testlink='/test')
+
+@app.route('/reset', methods=['GET', 'POST'])
+def reset():
+	os.remove('train.yml')
+	os.remove('test.yml')
+	return redirect('/ldfiles')
+
+@app.route('/pre/<rt>', methods=['POST'])
+def preprocessing(rt):
+	cps = cfw.CorpusFactory('raw.txt', isEng=False)
+
+	# for English
+	if 'tolower' in request.form:
+		cps.lower_case()
+	if 'toupper' in request.form:
+		cps.upper_case()
+	if 'stem' in request.form:
+		cps.stemming()
+	if 'seps' in request.form:
+		cps.sep_appo()
+
+	# for public
+	if 'num2str' in request.form:
+		cps.number_to_string()
+	if 'remodup' in request.form:
+		cps.remove_dup()
+	if 'remospec' in request.form:
+		cps.remove_spec()
+
+	# for Korean
+	if 'ma' in request.form:
+		cps.ma()
+
+	# Special
+	if 'tok' in request.form:
+		cps.tok2words()
+
+	cps.save()
+
+	return redirect('/ldfiles/{}'.format(rt))
+
 
 if __name__ == "__main__":
-	incon = in_console()
+	print('Hello world')

@@ -2,6 +2,7 @@
 from openpyxl import load_workbook
 import os
 import glob
+from werkzeug import filesystem
 
 # Load Question to Intention file
 # Frame:
@@ -52,13 +53,13 @@ def slot_string_transform(slot_string):
     return result
 
 ## Load excel 
-def excel_to_rawcorpus(path):
+def excel_to_rawcorpus(path, q2i_list):
     result = ''
     # Path is directory
     if os.path.isdir(path):
-        filelist = os.listdir(path)
+        filelist = glob.glob('work/*.xls*')
         for filename in filelist:
-            wb = load_workbook(filename = filename)
+            wb = load_workbook(filename=filename)
             sheet_ranges = wb['IOT']
             
             for i in range(10, 99999, 13):
@@ -69,11 +70,12 @@ def excel_to_rawcorpus(path):
                 for j in range(10):
                     sent_idx = 'C%d' % (i+3+j)
                     text = sheet_ranges[sent_idx].value # Sentence
-                    text = slot_fill(q2i, intention, text)
+                    if not text: break
+                    text = slot_fill(q2i_list, intention, text)
                     result += '%s\t%s\n' % (text, intention)
     # Path is filename
     else:
-        wb = load_workbook(filename = path)
+        wb = load_workbook(filename=path)
         sheet_ranges = wb['IOT']
 
         for i in range(10, 99999, 13):
@@ -117,8 +119,13 @@ def save_raw(textform, filename):
 
 # Load the corpus raw
 def load_raw(filename):
-    with open(filename, 'r', encoding='utf-8') as f:
-        raw = f.read().split('\n')
+    with open(filename, 'rb') as f:
+        data = f.read()
+        try:
+            data = data.decode('utf-8')
+        except UnicodeDecodeError:
+            data = data.decode('euc-kr')
+        raw = data.split('\n')
     result = dict()
     for line in raw:
         # End check
@@ -139,7 +146,7 @@ def make_raw(q2i_filename, excel_filepath):
     print("Result:", q2i_list[:5], '\n')
 
     print('[[[ Step 2 ]]]\tLoading and Converting (Excel to Python list object) file')
-    corpusraw = excel_to_rawcorpus(excel_filepath)
+    corpusraw = excel_to_rawcorpus(excel_filepath, q2i_list)
     print("Result:", corpusraw[:100], '\n')
 
     print('[[[ Step 3 ]]]\tSaving raw curpus file (txt)')

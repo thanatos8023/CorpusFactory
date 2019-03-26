@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CorpusFactory in web</title>
+</head>
+<body>
+    <h1>CorpusFactory in web</h1>
+    <div>
+        <h2>From Excel</h2>
+        <form action="/ldfiles/xl?type=q2i" method="POST" enctype="multipart/form-data">
+        Select question to intention mappling file: <input type="file" name="q2i">
+        <input type="submit">
+        </form>
+        {% if q2i_msg %}
+            <p>{{ q2i_msg }}</p>
+        {% endif %}
+        <br>
+        <form action="/ldfiles/xl?type=xl" method="POST" enctype="multipart/form-data">
+            Select excels: <input type="file" name="xl" multiple>
+            <input type="submit">
+        </form>
+        {% if raw_msg %}
+            <p>{{ raw_msg }}</p>
+        {% endif %}
+        <br>
+        <form action="/ldfiles/xl?type=cont" method="POST" enctype="multipart/form-data">
+            Select contents: <input type="file" name="cont" multiple>
+            <input type="submit">
+        </form>
+        {% if cont_msg %}
+            <p>{{ cont_msg }}</p>
+        {% endif %}
+    </div><br>
+    <div>
+        <h2>Preprocessing</h2>
+        <form action="/pre/xl" method="POST">
+        <h3>For public</h3>
+            <input type="checkbox" name="num2str" value="num2str"> Converting numbers to string<br>
+            <input type="checkbox" name="remodup" value="remodup"> Remove duplication<br>
+            <input type="checkbox" name="remospec" value="remospec"> Remove special character<br>
+            <input type="checkbox" name="tok" value="tok"> Tokenize to word list<br>
+            <h3>For Korean</h3>
+            <input type="checkbox" name="ma" value="ma"> Morpheme analyzer<br>
+            <h3>For English</h3>
+            <input type="checkbox" name="tolower" value="tolower"> Convert to lowercase<br>
+            <input type="checkbox" name="toupper" value="toupper"> Convert to uppercase<br>
+            <input type="checkbox" name="stem" value="stem"> Stemming<br>
+            <input type="checkbox" name="seps" value="seps"> Seperating 's<br>
+            <br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    {% extends 'makeyml.html' %}
+</body>
+</html>
