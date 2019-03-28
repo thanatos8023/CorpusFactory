@@ -1,4 +1,26 @@
 <div>
+    <h2>Preprocessing</h2>
+    <form action="/pre/{{ pt }}" method="POST">
+        <h3>For public</h3>
+        <input type="checkbox" name="num2str" value="num2str"> Converting numbers to string<br>
+        <input type="radio" name="lang" value="ko" checked> Korean
+        <input type="radio" name="lang" value="en"> English
+        <br>
+        <input type="checkbox" name="remodup" value="remodup"> Remove duplication<br>
+        <input type="checkbox" name="remospec" value="remospec"> Remove special character<br>
+        <input type="checkbox" name="tok" value="tok"> Tokenize to word list<br>
+        <h3>For Korean</h3>
+        <input type="checkbox" name="ma" value="ma"> Morpheme analyzer<br>
+        <h3>For English</h3>
+        <input type="checkbox" name="tolower" value="tolower"> Convert to lowercase<br>
+        <input type="checkbox" name="toupper" value="toupper"> Convert to uppercase<br>
+        <input type="checkbox" name="stem" value="stem"> Stemming<br>
+        <input type="checkbox" name="seps" value="seps"> Seperating 's<br>
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+</div>
+<div>
     <h2>코퍼스 만들기</h2>
     <form action="/makeyml" method="GET">
         Train ratio (0~1):<br>

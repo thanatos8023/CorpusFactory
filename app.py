@@ -69,9 +69,11 @@ class in_console():
 # 2. Web application
 app = Flask(__name__)
 
+
 @app.route('/')
 def hello():
 	return "Hello world!"
+
 
 @app.route('/cf')
 def home():
@@ -97,6 +99,7 @@ def file_existance_messages():
 		messages['cont'] = 'No contents files on server. Cannot make yml corpus. Please upload the contents files.'
 
 	return messages
+
 
 @app.route('/ldfiles')
 @app.route('/ldfiles/<filemeth>', methods=['GET', 'POST'])
@@ -150,9 +153,9 @@ def excel_load(filemeth=None):
 		messages = file_existance_messages()
 
 		if filemeth == 'xl':
-			return render_template('xlfiles.html', q2i_msg=messages['q2i'], raw_msg=messages['raw'], cont_msg=messages['cont'])
+			return render_template('xlfiles.html', q2i_msg=messages['q2i'], raw_msg=messages['raw'], cont_msg=messages['cont'], pt='xl')
 		elif filemeth == 'raw':
-			return render_template('rawfiles.html', cor_msg=messages['raw'], cont_msg=messages['cont'])
+			return render_template('rawfiles.html', cor_msg=messages['raw'], cont_msg=messages['cont'], pt='raw')
 		else:
 			return render_template('cf.html')
 
@@ -178,16 +181,21 @@ def make_yml():
 
 	return redirect('/download')
 
+
 @app.route('/train', methods=['GET', 'POST'])
 def train_download():
 	return send_file('train.yml')
+
+
 @app.route('/test', methods=['GET', 'POST'])
 def test_download():
 	return send_file('test.yml')
 
+
 @app.route('/download', methods=['GET', 'POST'])
 def download():
 	return render_template('download.html', trainlink='/train', testlink='/test')
+
 
 @app.route('/reset', methods=['GET', 'POST'])
 def reset():
@@ -195,9 +203,14 @@ def reset():
 	os.remove('test.yml')
 	return redirect('/ldfiles')
 
+
 @app.route('/pre/<rt>', methods=['POST'])
 def preprocessing(rt):
-	cps = cfw.CorpusFactory('raw.txt', isEng=False)
+	lang = request.form['lang']
+	if lang == 'en':
+		cps = cfw.CorpusFactory('raw.txt', isEng=True)
+	else:
+		cps = cfw.CorpusFactory('raw.txt', isEng=False)
 
 	# for English
 	if 'tolower' in request.form:
