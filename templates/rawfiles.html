@@ -7,22 +7,24 @@
 <body>
     <h1>CorpusFactory in web</h1>
     <div>
-        <h2>From Raw</h2>
-        <form action="/ldfiles/raw?type=raw" method="POST" enctype="multipart/form-data">
-            Select corpus: <input type="file" name="raw">
-            <input type="submit">
-        </form>
-        {% if cor_msg %}
-            <p>{{ cor_msg }}</p>
-        {% endif %}
-        <br>
-        <form action="/ldfiles/raw?type=cont" method="POST" enctype="multipart/form-data">
-            Select contents: <input type="file" name="cont" multiple>
-            <input type="submit">
-        </form>
-        {% if cont_msg %}
-            <p>{{ cont_msg }}</p>
-        {% endif %}
+        <fieldset>
+            <legend>Raw text file loading</legend>
+            <form action="/ldfiles/raw?type=raw" method="POST" enctype="multipart/form-data">
+                Select corpus: <input type="file" name="raw">
+                <input type="submit">
+            </form>
+            {% if cor_msg %}
+                <p>{{ cor_msg }}</p>
+            {% endif %}
+            <br>
+            <form action="/ldfiles/raw?type=cont" method="POST" enctype="multipart/form-data">
+                Select contents: <input type="file" name="cont" multiple>
+                <input type="submit">
+            </form>
+            {% if cont_msg %}
+                <p>{{ cont_msg }}</p>
+            {% endif %}
+        </fieldset>
     </div><br>
     {% extends 'makeyml.html' %}
 </body>

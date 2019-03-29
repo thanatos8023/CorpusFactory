@@ -7,30 +7,32 @@
 <body>
     <h1>CorpusFactory in web</h1>
     <div>
-        <h2>From Excel</h2>
-        <form action="/ldfiles/xl?type=q2i" method="POST" enctype="multipart/form-data">
-        Select question to intention mappling file: <input type="file" name="q2i">
-        <input type="submit">
-        </form>
-        {% if q2i_msg %}
-            <p>{{ q2i_msg }}</p>
-        {% endif %}
-        <br>
-        <form action="/ldfiles/xl?type=xl" method="POST" enctype="multipart/form-data">
-            Select excels: <input type="file" name="xl" multiple>
-            <input type="submit">
-        </form>
-        {% if raw_msg %}
-            <p>{{ raw_msg }}</p>
-        {% endif %}
-        <br>
-        <form action="/ldfiles/xl?type=cont" method="POST" enctype="multipart/form-data">
-            Select contents: <input type="file" name="cont" multiple>
-            <input type="submit">
-        </form>
-        {% if cont_msg %}
-            <p>{{ cont_msg }}</p>
-        {% endif %}
+        <fieldset>
+            <legend>Excel files loading and make raw file</legend>
+            <form action="/ldfiles/xl?type=q2i" method="POST" enctype="multipart/form-data">
+                Select question to intention mappling file: <input type="file" name="q2i">
+                <input type="submit">
+            </form>
+            {% if q2i_msg %}
+                <p>{{ q2i_msg }}</p>
+            {% endif %}
+            <br>
+            <form action="/ldfiles/xl?type=xl" method="POST" enctype="multipart/form-data">
+                Select excels: <input type="file" name="xl" multiple>
+                <input type="submit">
+            </form>
+            {% if raw_msg %}
+                <p>{{ raw_msg }}</p>
+            {% endif %}
+            <br>
+            <form action="/ldfiles/xl?type=cont" method="POST" enctype="multipart/form-data">
+                Select contents: <input type="file" name="cont" multiple>
+                <input type="submit">
+            </form>
+            {% if cont_msg %}
+                <p>{{ cont_msg }}</p>
+            {% endif %}
+        </fieldset>
     </div><br>
     {% extends 'makeyml.html' %}
 </body>
